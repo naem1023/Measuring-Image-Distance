@@ -1,4 +1,3 @@
-import os
 import train
 
 data_path = 'Z:/nyu_data/nyu_depth_data_labeled.mat'

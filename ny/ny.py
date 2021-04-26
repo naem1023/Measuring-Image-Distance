@@ -55,7 +55,7 @@ class NyDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        image = self.__get_image(self.root_dirm, idx)
+        image = self.__get_image(self.root_dir, idx)
         raw_depth_image = self.__get_raw_depth(self.root_dir, idx)
         depth_image = self.__get_depth(self.root_dir, idx)
 
@@ -68,38 +68,42 @@ class NyDataset(Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        return sample
+        return image, raw_depth_image
 
     def __get_raw_depth(self, root_dir, idx):
         rawDepth = self.img_data_file['rawDepths'][idx]
+
+        # return rawDepth
         rawDepth_ = np.empty([480, 640, 3])
         rawDepth_[:, :, 0] = rawDepth[:, :].T
         rawDepth_[:, :, 1] = rawDepth[:, :].T
         rawDepth_[:, :, 2] = rawDepth[:, :].T
 
-        image = io.imread(rawDepth_ / 4.0)
-        return image
+        # image = io.imread(rawDepth_ / 4.0)
+        return rawDepth_
 
     def __get_depth(self, root_dir, idx):
         depth = self.img_data_file['depths'][idx]
+        # return depth
         depth_ = np.empty([480, 640, 3])
         depth_[:, :, 0] = depth[:, :].T
         depth_[:, :, 1] = depth[:, :].T
         depth_[:, :, 2] = depth[:, :].T
 
-        image = io.imread(depth_ / 4.0)
-        return image
+        # image = io.imread(depth_ / 4.0)
+        return depth_
 
     def __get_image(self, root_dir, idx):
         img = self.img_data_file['images'][idx]
+        # return img
         img_ = np.empty([480, 640, 3])
         img_[:, :, 0] = img[0, :, :].T
         img_[:, :, 1] = img[1, :, :].T
         img_[:, :, 2] = img[2, :, :].T
 
         imag_ = img_.astype('float32')
-        image = io.imread(imag_ / 255.0)
-        return image
+        # image = io.imread(imag_ / 255.0)
+        return imag_
 
 
 # v1의 파일이름 배열 부르기
@@ -125,15 +129,16 @@ print(f['rawDepths'])
 
 # 첫번째 image, 3*640*480
 img = f['images'][0]
-print(f['images'])
+print(img.shape)
 # #전치
-# img_=np.empty([480,640,3])
-# img_[:,:,0]=img[0,:,:].T
-# img_[:,:,1]=img[1,:,:].T
-# img_[:,:,2]=img[2,:,:].T
-#
-# imag_=img_.astype('float32')
-# io.imshow(imag_/255.0)
+img_=np.empty([480,640,3])
+img_[:,:,0]=img[0,:,:].T
+img_[:,:,1]=img[1,:,:].T
+img_[:,:,2]=img[2,:,:].T
+print(img_.shape)
+
+imag_=img_.astype('float32')
+io.imshow(imag_/255.0)
 # io.show()
 
 # 대응하는 depth(image에 조절, 복원됨), 640*480
