@@ -32,17 +32,20 @@ def get_dataset(path):
 
     train_dataset, val_dataset = torch.utils.data.random_split(ny_dataset, [train_len, val_len])
 
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=64, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=32, shuffle=True)
+    val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=32, shuffle=True)
 
     return train_loader, val_loader
 
 def train(data):
+    use_cuda = torch.cuda.is_available()
+    if use_cuda:
+        print('you can use cuda')
     train_loader, test_loader = data
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(53)
-    if device == 'cuda':
-        torch.cuda.manual_seed_all(53)
+    # torch.manual_seed(53)
+    # if device == 'cuda':
+    #     torch.cuda.manual_seed_all(53)
 
     model = resnet.get_model()
     model = model.to(device)
