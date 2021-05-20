@@ -1,4 +1,5 @@
-import train
+import ny.train
+import ny.data
 
 data_path = 'Z:/nyu_data/nyu_depth_data_labeled.mat'
 
@@ -12,6 +13,8 @@ def unpickle(file):
 
 if __name__ == '__main__':
     # Get data from path and load to torchvision
-    data = train.get_dataset(data_path)
+    dataset = ny.data.Data(data_path)
+    train_data = dataset.get_dataset()
 
-    train.train(data)
+    trainer = ny.train.Train()
+    trainer.train(train_data)
