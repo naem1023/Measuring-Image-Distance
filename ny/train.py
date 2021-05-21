@@ -26,12 +26,17 @@ class Train:
 
     def train(self, data):
         train_loader, test_loader = data
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # torch.manual_seed(53)
         # if device == 'cuda':
         #     torch.cuda.manual_seed_all(53)
 
         model = ny.ml_model.MIS()
+
+        if torch.cuda.device_count() > 1:
+            os.environ["CUDA_VISIBLE_DEVICES"] = '0, 1, 2, 3'
+            model = nn.DataParallel(model, output_device=1)
+
         model = model.to(device)
 
         # Optimize
@@ -44,7 +49,7 @@ class Train:
         start_time = time.time()
         min_loss = int(1e9)
         history = {'loss': [], 'val_acc': []}
-        for epoch in range(10):  # loop over the dataset multiple times
+        for epoch in range(1):  # loop over the dataset multiple times
             epoch_loss = 0.0
             tk0 = tqdm(train_loader, total=len(train_loader), leave=False)
             for step, (inputs, labels) in enumerate(tk0, 0):
