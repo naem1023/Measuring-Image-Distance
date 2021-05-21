@@ -6,7 +6,7 @@ class Data:
         self.ny_dataset = ny.ny.NyDataset(path)
 
     def get_dataset(self, train_ratio=0.8):
-        # Set split lenght
+        # Set split length
         train_len = int(len(self.ny_dataset) * train_ratio)
         test_len = len(self.ny_dataset) - train_len
 
