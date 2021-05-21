@@ -44,7 +44,7 @@ class Train:
         start_time = time.time()
         min_loss = int(1e9)
         history = {'loss': [], 'val_acc': []}
-        for epoch in range(10):  # loop over the dataset multiple times
+        for epoch in range(1):  # loop over the dataset multiple times
             epoch_loss = 0.0
             tk0 = tqdm(train_loader, total=len(train_loader), leave=False)
             for step, (inputs, labels) in enumerate(tk0, 0):
