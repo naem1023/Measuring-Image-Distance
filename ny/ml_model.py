@@ -26,16 +26,19 @@ class MIS(nn.Module):
     """
 
     def __init__(self, sub_sampling_ratio=16, width=480, height=640):
+        super(MIS, self).__init__()
         self.sub_sampling_ratio = sub_sampling_ratio
         self.width = width
         self.height = height
         size = (7, 7)
 
-        self.feature_extractor = self.feature_extraction()
-        self.adaptive_max_pool = nn.AdaptiveMaxPool2d(size[0], size[1])
+        self.feature_extractor = self.get_feature_extraction()
+        self.adaptive_max_pool = nn.AdaptiveMaxPool2d(size)
         self.fc1 = nn.Linear(7 * 7 * 512, 2048)
         self.fc2 = nn.Linear(2048, 512)
         self.fc3 = nn.Linear(512, 1)
+
+        print('make MIS model')
 
     def rol_pooling(self, output_map):
         output = [self.adaptive_max_pool(out)[0] for out in output_map]
@@ -45,7 +48,8 @@ class MIS(nn.Module):
     def forward(self, x):
         x = self.feature_extractor(x)
         x = self.adaptive_max_pool(x)
-        x = torch.cat(x, 0)
+        # x = torch.cat(x, 0)
+        x = x.view(x.size(0), -1)
 
         x = self.fc1(x)
         x = F.relu(x)
@@ -56,9 +60,11 @@ class MIS(nn.Module):
         x = self.fc3(x)
         output = F.softplus(x)
 
-        return x
+        return output
 
-    def feature_extraction(self):
+    def get_feature_extraction(self):
+        """Return network which produces feature map.
+        """
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         model = torchvision.models.vgg16(pretrained=True).to(device)
@@ -81,7 +87,7 @@ class MIS(nn.Module):
             req_features.append(feature)
 
         faster_rcnn_feature_extractor = nn.Sequential(*req_features)
-
+        torch.cuda.empty_cache()
         return faster_rcnn_feature_extractor
 
 

@@ -90,8 +90,8 @@ class NyDataset(Dataset):
 
         depth = [ depth_image[0][pos[0] * x_interval][pos[1] * y_interval] for pos in positions ]
         # Range of depth is 0 to 10. So divide by 10.
-        depth = np.array(depth) * 1000
-        depth = depth.astype(np.int64)
+        depth = np.array(depth)
+        # depth = depth.astype(np.int64)
 
         return depth
 
