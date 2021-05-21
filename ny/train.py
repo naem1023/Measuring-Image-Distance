@@ -26,12 +26,17 @@ class Train:
 
     def train(self, data):
         train_loader, test_loader = data
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # torch.manual_seed(53)
         # if device == 'cuda':
         #     torch.cuda.manual_seed_all(53)
 
         model = ny.ml_model.MIS()
+
+        if torch.cuda.device_count() > 1:
+            os.environ["CUDA_VISIBLE_DEVICES"] = '0, 1, 2, 3'
+            model = nn.DataParallel(model, output_device=1)
+
         model = model.to(device)
 
         # Optimize
