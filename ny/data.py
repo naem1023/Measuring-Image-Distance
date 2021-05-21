@@ -12,7 +12,7 @@ class Data:
 
         train_dataset, test_dataset = torch.utils.data.random_split(self.ny_dataset, [train_len, test_len])
 
-        train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=5, shuffle=True)
-        test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=5, shuffle=True)
+        train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=10, shuffle=True)
+        test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=10, shuffle=True)
 
         return train_loader, test_loader

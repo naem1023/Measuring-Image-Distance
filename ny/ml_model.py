@@ -5,12 +5,8 @@ from torchvision import datasets, models, transforms
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torchsummary import summary
-
 # construct model on cuda if available
 use_cuda = torch.cuda.is_available()
-
-import torch
 
 
 # https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html
@@ -174,13 +170,3 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Fa
         exit()
 
     return model_ft, input_size
-
-
-model_name = 'resnet'
-num_classes = 2
-feature_extract = False
-# Initialize the model for this run
-model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
-
-# Print the model we just instantiated
-print(model_ft)

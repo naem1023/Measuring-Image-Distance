@@ -1,5 +1,3 @@
-import skimage.io as io
-import numpy as np
 import h5py
 import scipy.io
 from torch.utils.data import Dataset, DataLoader
