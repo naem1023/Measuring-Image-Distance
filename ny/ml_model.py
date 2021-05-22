@@ -34,7 +34,7 @@ class MIS(nn.Module):
 
         self.feature_extractor = self.get_feature_extraction()
         self.adaptive_max_pool = nn.AdaptiveMaxPool2d(size)
-        self.fc1 = nn.Linear(7 * 7 * self.extraction_size, fc1_out)
+        self.fc1 = nn.Linear(7 * 7 * self.extraction_size + 2, fc1_out)
         self.fc2 = nn.Linear(fc1_out, fc2_out)
         self.fc3 = nn.Linear(fc2_out, 1)
 
@@ -45,11 +45,22 @@ class MIS(nn.Module):
 
         return output
 
-    def forward(self, x):
+    def forward(self, sample):
+        x = sample[0] # image
+        target = sample[1] # target coordinate
+
         x = self.feature_extractor(x)
         x = self.adaptive_max_pool(x)
-        # x = torch.cat(x, 0)
         x = x.view(x.size(0), -1)
+        targetT = torch.transpose(target, 0, 1)
+
+        x_list = x.tolist()
+        targetT_list = targetT.tolist()
+
+        for i in range(x.shape[0]):
+            for target in targetT_list[i]:
+                x_list[i].append(target)
+        x = torch.tensor(x_list).cuda()
 
         x = self.fc1(x)
         x = F.relu(x)

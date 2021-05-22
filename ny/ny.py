@@ -50,18 +50,17 @@ class NyDataset(Dataset):
         # raw_depth_image = self.__get_raw_depth(self.root_dir, converted_idx[:, 0])
         depth_image = self.__get_depth(self.root_dir, converted_idx[:, 0])
 
-        depth_list = self.get_depth_point(depth_image, converted_idx[:, 1])
+        depth_list, target_coordinate = self.get_depth_point(depth_image, converted_idx[:, 1])
 
-        # sample = {
-        #     'image': image,
-        #     'raw_depth_image': raw_depth_image,
-        #     'depth_image': depth_image,
-        # }
+        sample = {
+            'image': image,
+            'target_coordinate': target_coordinate
+        }
         #
         # if self.transform:
         #     sample = self.transform(sample)
 
-        return image, depth_list
+        return sample, depth_list
 
     def get_depth_point(self, depth_image, idxes):
         # Not coordinate of image, only order of training points.
@@ -70,11 +69,11 @@ class NyDataset(Dataset):
         y_interval = depth_image.shape[2] // self.y_point
 
         depth = [ depth_image[0][pos[0] * x_interval][pos[1] * y_interval] for pos in positions ]
-        # Range of depth is 0 to 10. So divide by 10.
-        depth = np.array(depth)
-        # depth = depth.astype(np.int64)
+        target_coordinate = [ [pos[0] * x_interval, pos[1] * y_interval] for pos in positions ]
 
-        return depth
+        depth = np.array(depth)
+
+        return depth, target_coordinate
 
     def __get_raw_depth(self, root_dir, idx):
         rawDepth = self.img_data_file['rawDepths'][idx] / 4.0
