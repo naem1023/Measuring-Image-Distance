@@ -22,7 +22,7 @@ transform = transforms.Compose([
 
 class Train:
     def __init__(self):
-        pass
+        self.save_path = '.\\'
 
     def train(self, data):
         train_loader, test_loader = data
@@ -96,3 +96,5 @@ class Train:
 
         print(time.time() - start_time)
         print('Finished Training')
+
+        torch.save(model.state_dict(), os.path.join(self.save_path, 'model_state_dict.pt'))
