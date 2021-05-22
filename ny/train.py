@@ -53,10 +53,12 @@ class Train:
             epoch_loss = 0.0
             tk0 = tqdm(train_loader, total=len(train_loader), leave=False)
             for step, (inputs, labels) in enumerate(tk0, 0):
-                inputs, labels = inputs.to(device), labels.to(device)
+                image_inputs = inputs['image']
+                coordinate_inputs = torch.stack([val for val in inputs['target_coordinate'][0]], dim=0).to(device)
+                image_inputs, labels = image_inputs.to(device), labels.to(device)
                 # zero the parameter gradients
                 optimizer.zero_grad()
-                outputs = model(inputs)
+                outputs = model((image_inputs, coordinate_inputs))
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
