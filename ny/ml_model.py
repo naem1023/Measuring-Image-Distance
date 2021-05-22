@@ -21,18 +21,22 @@ class MIS(nn.Module):
     """Measuring Image Distance Model
     """
 
-    def __init__(self, sub_sampling_ratio=16, width=480, height=640):
+    def __init__(self, sub_sampling_ratio=16, width=480, height=640, model_selection='mobile'):
         super(MIS, self).__init__()
         self.sub_sampling_ratio = sub_sampling_ratio
         self.width = width
         self.height = height
+        self.model_selection = model_selection
+
         size = (7, 7)
+        fc1_out = 128
+        fc2_out = int(fc1_out / 4)
 
         self.feature_extractor = self.get_feature_extraction()
         self.adaptive_max_pool = nn.AdaptiveMaxPool2d(size)
-        self.fc1 = nn.Linear(7 * 7 * 512, 2048)
-        self.fc2 = nn.Linear(2048, 512)
-        self.fc3 = nn.Linear(512, 1)
+        self.fc1 = nn.Linear(7 * 7 * self.extraction_size, fc1_out)
+        self.fc2 = nn.Linear(fc1_out, fc2_out)
+        self.fc3 = nn.Linear(fc2_out, 1)
 
         print('make MIS model')
 
@@ -61,9 +65,15 @@ class MIS(nn.Module):
     def get_feature_extraction(self):
         """Return network which produces feature map.
         """
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        model = torchvision.models.vgg16(pretrained=True).to(device)
+        if self.model_selection == 'vgg':
+            model = torchvision.models.vgg11(pretrained=True).to(device)
+            self.extraction_size = 512
+        elif self.model_selection == 'mobile':
+            model = torchvision.models.mobilenet_v3_small(pretrained=True).to(device)
+            self.extraction_size = 48
+
         features = list(model.features)
 
         # only collect layers with output feature map size (W, H) < 50
@@ -83,7 +93,6 @@ class MIS(nn.Module):
             req_features.append(feature)
 
         faster_rcnn_feature_extractor = nn.Sequential(*req_features)
-        torch.cuda.empty_cache()
         return faster_rcnn_feature_extractor
 
 
