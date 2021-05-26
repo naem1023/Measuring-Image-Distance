@@ -1,20 +1,17 @@
-import ny.train
-import ny.data
-
-data_path = 'Z:/nyu_data/nyu_depth_data_labeled.mat'
-
-
-def unpickle(file):
-    import pickle
-    with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-    return dict
-
+import ny.distance
+import h5py
+import numpy as np
+from skimage import io, transform
 
 if __name__ == '__main__':
-    # Get data from path and load to torchvision
-    dataset = ny.data.Data(data_path)
-    train_data = dataset.get_dataset()
+    model_path = 'model_state_dict.pth'
+    predictor = ny.distance.DistancePredictor(model_path)
 
-    trainer = ny.train.Train()
-    trainer.train(train_data)
+    path_to_depth_v1 = 'Z:/nyu_data/nyu_depth_data_labeled.mat'
+    f = h5py.File(path_to_depth_v1)
+    img = f['images'][0]
+    transform_img = img.astype('float32') / 255.0
+    point = [640 // 10 * 2, 480 // 10 * 2]
+
+    output = predictor.predict(transform_img, point)
+    print(output)
