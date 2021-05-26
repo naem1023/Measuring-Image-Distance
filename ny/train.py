@@ -20,9 +20,24 @@ transform = transforms.Compose([
 ])
 
 
+class RMSELoss(nn.Module):
+    """Calculate RMSE Loss for validating test data.
+    """
+    def __init__(self, eps=1e-6):
+        super().__init__()
+        self.mse = nn.MSELoss()
+        self.eps = eps
+
+    def forward(self, yhat, y):
+        """Calculate RMSE Loss from two vectors.
+        Plus epsilon for preventing zero division.
+        """
+        loss = torch.sqrt(self.mse(yhat, y) + self.eps)
+        return loss
+
 class Train:
     def __init__(self):
-        self.save_path = '.\\'
+        self.save_path = 'gdrive/MyDrive/Colab Notebooks/'
 
     def train(self, data):
         train_loader, test_loader = data
@@ -36,6 +51,7 @@ class Train:
         if torch.cuda.device_count() > 1:
             os.environ["CUDA_VISIBLE_DEVICES"] = '0, 1, 2, 3'
             model = nn.DataParallel(model, output_device=1)
+            print('Multi GPU!!!!!!!!!!!!!!')
 
         model = model.to(device)
 
@@ -44,12 +60,13 @@ class Train:
         criterion = nn.SmoothL1Loss().cuda()
         # optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
         optimizer = optim.Adam(model.parameters(), lr=0.01)
+        epochs = 10
 
         import time
         start_time = time.time()
         min_loss = int(1e9)
         history = {'loss': [], 'val_acc': []}
-        for epoch in range(1):  # loop over the dataset multiple times
+        for epoch in range(epochs):  # loop over the dataset multiple times
             epoch_loss = 0.0
             tk0 = tqdm(train_loader, total=len(train_loader), leave=False)
             for step, (inputs, labels) in enumerate(tk0, 0):
@@ -65,38 +82,37 @@ class Train:
 
                 epoch_loss += loss.item()
 
+            train_loader.dataset.dataset.read_img = True
+            train_loader.dataset.dataset.read_depth = True
+            # print('make true')
             # validation
-            if epoch % 10 == 0:
-                class_correct = list(0. for i in range(1000))
-                class_total = list(0. for i in range(1000))
-                with torch.no_grad():
-                    for data in test_loader:
-                        images, labels = data
-                        images = images.cuda()
-                        labels = labels.cuda()
-                        outputs = model(images)
-                        _, predicted = torch.max(outputs, 1)
-                        c = (predicted == labels).squeeze()
-                        for i in range(labels.size()[0]):
-                            label = labels[i].item()
-                            class_correct[label] += c[i].item()
-                            class_total[label] += 1
-                val_acc = sum(class_correct) / sum(class_total) * 100
-            else:
-                val_acc = 0
+            # if epoch % 10 == 0:
+            validation_criterion = RMSELoss()
+            rmse_loss = 0
+            with torch.no_grad():
+                for data in test_loader:
+                    inputs, labels = data
+                    image_inputs = inputs['image']
+                    coordinate_inputs = torch.stack([val for val in inputs['target_coordinate'][0]], dim=0).cuda()
+
+                    images = image_inputs.cuda()
+                    labels = labels.cuda()
+                    outputs = model((images, coordinate_inputs))
+                    _, predicted = torch.max(outputs, 1)
+                    rmse_loss = validation_criterion(labels, predicted)
 
             # print statistics
-            tqdm.write('[Epoch : %d] train_loss: %.5f val_acc: %.2f Total_elapsed_time: %d 분' %
-                       (epoch + 1, epoch_loss / 272, val_acc, (time.time() - start_time) / 60))
-            history['loss'].append(epoch_loss / 272)
-            history['val_acc'].append(val_acc)
+            tqdm.write('[Epoch : %d] train_loss: %.5f val_acc: %.2f Total_elapsed_time: %d minute' %
+                       (epoch + 1, epoch_loss / len(train_loader), rmse_loss, (time.time() - start_time) / 60))
+            history['loss'].append(epoch_loss / len(train_loader))
+            history['val_acc'].append(rmse_loss)
 
-            if epoch in [36, 64, 92]:
-                for g in optimizer.param_groups:
-                    g['lr'] /= 10
-                print('Loss 1/10')
+            # if epoch in [36, 64, 92]:
+            #     for g in optimizer.param_groups:
+            #         g['lr'] /= 10
+            #     print('Loss 1/10')
 
-        print(time.time() - start_time)
+        print((time.time() - start_time) / 60)
         print('Finished Training')
 
-        torch.save(model.state_dict(), os.path.join(self.save_path, 'model_state_dict.pt'))
+        torch.save(model.state_dict(), os.path.join(self.save_path, 'model_state_dict.pth'))

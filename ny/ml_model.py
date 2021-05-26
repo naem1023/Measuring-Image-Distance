@@ -29,7 +29,7 @@ class MIS(nn.Module):
         self.model_selection = model_selection
 
         size = (7, 7)
-        fc1_out = 128
+        fc1_out = 64
         fc2_out = int(fc1_out / 4)
 
         self.feature_extractor = self.get_feature_extraction()
@@ -71,6 +71,7 @@ class MIS(nn.Module):
         x = self.fc3(x)
         output = F.softplus(x)
 
+        print(output)
         return output
 
     def get_feature_extraction(self):
@@ -84,6 +85,7 @@ class MIS(nn.Module):
         elif self.model_selection == 'mobile':
             model = torchvision.models.mobilenet_v3_small(pretrained=True).to(device)
             self.extraction_size = 48
+
 
         features = list(model.features)
 
