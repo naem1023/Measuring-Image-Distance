@@ -63,15 +63,14 @@ class MIS(nn.Module):
         x = torch.tensor(x_list).cuda()
 
         x = self.fc1(x)
-        x = F.relu(x)
+        # x = F.relu(x)
 
         x = self.fc2(x)
-        x = F.relu(x)
+        # x = F.relu(x)
 
         x = self.fc3(x)
         output = F.softplus(x)
 
-        print(output)
         return output
 
     def get_feature_extraction(self):

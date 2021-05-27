@@ -1,5 +1,6 @@
 import h5py
 import numpy as np
+import scipy
 from skimage import io, transform
 
 # v1,2_labeled: depths,images,rawDepths, rawDepthFilenames
@@ -10,10 +11,10 @@ path_to_filename_v1 = 'Z:/nyu_data/nyu_depth_v1_filenames.mat'
 f = h5py.File(path_to_depth_v2)
 
 # v1의 파일이름 배열 부르기
-file_name = scipy.io.loadmat(path_to_filename_v1)
-dname = file_name['rawDepthFilenames']
-
-rname = file_name['rawRgbFilenames']
+# file_name = scipy.io.loadmat(path_to_filename_v1)
+# dname = file_name['rawDepthFilenames']
+#
+# rname = file_name['rawRgbFilenames']
 
 # 첫번째 rawDepths, 480*640
 rawDepth = f['rawDepths'][0]
@@ -28,7 +29,7 @@ rawDepth_[:,:,2]=rawDepth[:,:].T
 
 # 첫번째 image, 3*640*480
 img = f['images'][0]
-
+print('img shape', img.shape)
 # #전치
 img_=np.empty([480,640,3])
 img_[:,:,0]=img[0,:,:].T
@@ -45,6 +46,7 @@ depth = f['depths'][0]
 
 # #전치
 depth_=np.empty([480,640,3])
+print('depth shape', depth.shape)
 depth_[:,:,0]=depth[:,:].T
 depth_[:,:,1]=depth[:,:].T
 depth_[:,:,2]=depth[:,:].T

@@ -8,14 +8,14 @@ class DistancePredictor:
         state_dict = torch.load(model_path)
         self.model = ny.ml_model.MIS()
         self.model.load_state_dict(state_dict)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def predict(self, image, point):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.eval()
-        self.model = self.model.to(device)
+        self.model = self.model.to(self.device)
 
         image = np.reshape(image, (1, 3, 640, 480))
-        image = torch.tensor(image).to(device)
+        image = torch.tensor(image).to(self.device)
 
         point = [torch.tensor([point[0]]), torch.tensor([point[1]])]
         point = torch.tensor(point)
@@ -23,5 +23,4 @@ class DistancePredictor:
 
         output = self.model((image, point))
 
-        print(output)
         return output
