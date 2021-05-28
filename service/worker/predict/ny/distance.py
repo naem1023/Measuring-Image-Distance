@@ -1,11 +1,11 @@
 import torch
-import ny.ml_model
+import predict.ny.ml_model
 import numpy as np
 
 
 class DistancePredictor:
     def __init__(self, model_path):
-        state_dict = torch.load(model_path)
+        state_dict = torch.load(model_path, map_location=torch.device('cpu'))
         self.model = ny.ml_model.MIS()
         self.model.load_state_dict(state_dict)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

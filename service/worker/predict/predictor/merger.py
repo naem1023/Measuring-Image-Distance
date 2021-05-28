@@ -1,6 +1,6 @@
 import numpy
 
-import ny.distance as distance
+import predict.ny.distance as distance
 import megadepth.MegaDepth.models
 from megadepth.MegaDepth.predictor import Predictor
 from megadepth.MegaDepth.options.train_options import TrainOptions
