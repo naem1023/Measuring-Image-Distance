@@ -12,6 +12,15 @@ import torch.nn as nn
 import numpy as np
 
 
+def transform_to_rgb(depth: numpy.ndarray) -> numpy.ndarray:
+    predict_img = np.empty([depth.shape[0], depth.shape[1], 3])
+    predict_img[:, :, 0] = depth
+    predict_img[:, :, 1] = depth
+    predict_img[:, :, 2] = depth
+
+    return predict_img
+
+
 def transpose_img(img: numpy.ndarray, to_normal=False) -> numpy.ndarray:
     if to_normal:
         if len(img.shape) == 3:
@@ -32,7 +41,6 @@ def transpose_img(img: numpy.ndarray, to_normal=False) -> numpy.ndarray:
             img_[2, :, :] = img[:, :, 2].T
         elif len(img.shape) == 2:
             img_ = img.T.astype('float32')
-
 
     return img_
 
