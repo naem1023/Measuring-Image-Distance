@@ -1,17 +1,38 @@
 import numpy
 
 import ny.distance as distance
+import megadepth.MegaDepth.models
 from megadepth.MegaDepth.predictor import Predictor
 from megadepth.MegaDepth.options.train_options import TrainOptions
 from megadepth.MegaDepth.models.models import create_model
 
 from skimage import io
+import torch
+import torch.nn as nn
+
+
+class RMSELoss(nn.Module):
+    """Calculate RMSE Loss for validating test data.
+    """
+
+    def __init__(self, eps=1e-6):
+        super().__init__()
+        self.mse = nn.MSELoss()
+        self.eps = eps
+
+    def forward(self, yhat, y):
+        """Calculate RMSE Loss from two vectors.
+        Plus epsilon for preventing zero division.
+        """
+        loss = torch.sqrt(self.mse(yhat, y) + self.eps)
+        return loss
+
 
 class Merger:
     """Merge distance(meter) and depth information.
     """
 
-    def __init__(self, distance_model_path, x_point = 10, y_point = 10):
+    def __init__(self, distance_model_path, x_point=10, y_point=10):
         self.distance_predictor = self.get_distance_predictor(distance_model_path)
         self.depth_model = self.get_depth_model()
         self.x_point = x_point
@@ -24,16 +45,21 @@ class Merger:
         """Calculate distance of all pixels using few distances and full depth.
         """
         img = self.__read_image(img_path).astype('float32') / 255.0
-        distances = self.get_distance(img)
-        depthes = self.get_depth(img_path)
+        distances = self.get_distance(img) * 4
+        depthes = self.get_depth(img_path, img.shape[0], img.shape[1])
 
         x_interval = img.shape[0] // self.x_point
         y_interval = img.shape[1] // self.y_point
 
+        mid_pivot = len(distances) // 2
+        point, predict_distance = distances[mid_pivot]
+        predict_depth = depthes[point[0], point[1]]
+        ratio = predict_distance / predict_depth
+
         for distance_info in distances:
             point, predict_distance = distance_info
-            predict_depth = img[point[0], point[1]]
-            ratio = predict_distance / predict_depth
+            # predict_depth = depthes[point[0], point[1]]
+            # ratio = predict_distance / predict_depth
             x = point[0] - self.x_point
             y = point[1]
 
@@ -46,8 +72,9 @@ class Merger:
     def get_distance(self, img: numpy.ndarray) -> list:
         distances = []
         for i in range(self.x_point):
-            target = [img.shape[0] // self.x_point * i, img.shape[1] // self.y_point * i]
-            distances.append([target, self.distance_predictor.predict(img, target)])
+            for j in range(self.y_point):
+                target = [img.shape[0] // self.x_point * i, img.shape[1] // self.y_point * j]
+                distances.append([target, self.distance_predictor.predict(img, target).item()])
 
         return distances
 

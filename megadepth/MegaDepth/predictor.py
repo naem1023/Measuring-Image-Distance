@@ -6,7 +6,8 @@ import numpy as np
 from skimage import io
 from skimage.transform import resize
 
-from models.HG_model import HGModel
+# from models.HG_model import HGModel
+from megadepth.MegaDepth.models.HG_model import HGModel
 
 
 class Predictor:

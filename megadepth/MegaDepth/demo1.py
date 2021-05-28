@@ -16,7 +16,8 @@ predictor = Predictor(model, 384, 512)
 img_path = 'demo.jpg'
 result = predictor.estimate_depth(img_path)
 print(result.shape)
-io.imsave('demo.png', result)
+print(result)
+io.imsave('./result.png', result)
 print("We are done")
 sys.exit()
 
