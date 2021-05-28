@@ -1,0 +1,12 @@
+h5py==3.2.1
+imageio==2.9.0
+matplotlib==3.4.1
+Pillow==8.2.0
+scikit-image==0.18.1
+scipy==1.6.3
+torch==1.8.1+cu111
+torchaudio==0.8.1
+torchsummary==1.5.1
+torchvision==0.9.1+cu111
+tqdm==4.60.0
+
