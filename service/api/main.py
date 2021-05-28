@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import pika
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header
+from fastapi.middleware.cors import CORSMiddleware
 from aiofile import AIOFile, Writer, Reader
 
 upload_directory = os.environ['UPLOAD_PATH']
@@ -52,6 +53,13 @@ async def read_file(filename: string):
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 @app.post("/files")
 async def upload_files(files: List[UploadFile] = File(...)):
