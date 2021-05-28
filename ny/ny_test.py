@@ -9,7 +9,7 @@ path_to_depth_v2 = 'Z:/nyu_data/nyu_depth_v2_labeled.mat'
 path_to_depth_v1 = 'Z:/nyu_data/nyu_depth_data_labeled.mat'
 # v1_filenames: rawDepthFilenames, rawRgbFilenames
 path_to_filename_v1 = 'Z:/nyu_data/nyu_depth_v1_filenames.mat'
-f = h5py.File(path_to_depth_v2)
+f = h5py.File(path_to_depth_v1)
 
 # v1의 파일이름 배열 부르기
 # file_name = scipy.io.loadmat(path_to_filename_v1)
@@ -58,7 +58,7 @@ print('depth', type(depth[0][0]))
 
 io.imsave('demo_depth.jpg', depth_)
 #
-# io.imshow(depth_/4.0)
+io.imshow(depth_/4.0)
 # io.show()
 
 from tqdm import tqdm

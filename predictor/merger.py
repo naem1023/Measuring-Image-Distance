@@ -9,6 +9,32 @@ from megadepth.MegaDepth.models.models import create_model
 from skimage import io
 import torch
 import torch.nn as nn
+import numpy as np
+
+
+def transpose_img(img: numpy.ndarray, to_normal=False) -> numpy.ndarray:
+    if to_normal:
+        if len(img.shape) == 3:
+            img_ = np.empty((img.shape[0], img.shape[1], 3))
+            img_ = img_.astype('float32')
+            img_[:, :, 0] = img[0, :, :].T
+            img_[:, :, 1] = img[1, :, :].T
+            img_[:, :, 2] = img[2, :, :].T
+        elif len(img.shape) == 2:
+            img_ = img.T.astype('float32')
+
+    else:
+        if len(img.shape) == 3:
+            img_ = np.empty((3, img.shape[1], img.shape[0]))
+            img_ = img_.astype('float32')
+            img_[0, :, :] = img[:, :, 0].T
+            img_[1, :, :] = img[:, :, 1].T
+            img_[2, :, :] = img[:, :, 2].T
+        elif len(img.shape) == 2:
+            img_ = img.T.astype('float32')
+
+
+    return img_
 
 
 class RMSELoss(nn.Module):
@@ -41,12 +67,24 @@ class Merger:
     def __read_image(self, img_path: str) -> numpy.ndarray:
         return io.imread(img_path)
 
+    # def __transpose_img(self, img) -> numpy.ndarray:
+    #     img_ = np.empty([img.shape[2], img.shape[1], img.shape[0]])
+    #     img_ = img_.astype('float32')
+    #     img_[:, :, 0] = img[0, :, :].T
+    #     img_[:, :, 1] = img[1, :, :].T
+    #     img_[:, :, 2] = img[2, :, :].T
+    #
+    #     return img_
+
     def merge(self, img_path: str) -> numpy.ndarray:
         """Calculate distance of all pixels using few distances and full depth.
         """
         img = self.__read_image(img_path).astype('float32') / 255.0
-        distances = self.get_distance(img) * 4
+
         depthes = self.get_depth(img_path, img.shape[0], img.shape[1])
+        depthes = transpose_img(depthes)
+        img = transpose_img(img)
+        distances = self.get_distance(img)
 
         x_interval = img.shape[0] // self.x_point
         y_interval = img.shape[1] // self.y_point
@@ -67,13 +105,13 @@ class Merger:
                 for j in range(y_interval):
                     depthes[x + i, y + j] *= ratio
 
-        return depthes
+        return transpose_img(depthes) * 4
 
     def get_distance(self, img: numpy.ndarray) -> list:
         distances = []
         for i in range(self.x_point):
             for j in range(self.y_point):
-                target = [img.shape[0] // self.x_point * i, img.shape[1] // self.y_point * j]
+                target = [img.shape[1] // self.x_point * i, img.shape[2] // self.y_point * j]
                 distances.append([target, self.distance_predictor.predict(img, target).item()])
 
         return distances
