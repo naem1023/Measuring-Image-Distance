@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import pika
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from aiofile import AIOFile, Writer, Reader
 
@@ -37,18 +38,6 @@ async def store_file(uploaded_file: UploadFile, destination: string):
                 break
             await writer(chunk)
     return destination
-
-
-async def read_file(filename: string):
-    result = b''
-    async with AIOFile(os.path.join(upload_directory, filename), 'rb') as f:
-        reader = Reader(f)
-        while True:
-            chunk = await reader.read_chunk()
-            if not chunk:
-                break
-            result += chunk
-    return result
 
 
 app = FastAPI()
@@ -97,11 +86,10 @@ async def upload_file(
 
 @app.get("/files/{filename}")
 async def get_file(filename: str):
-    try:
-        result = await read_file(filename)
-    except FileNotFoundError:
+    if not os.path.isfile(os.path.join(upload_directory, filename)):
         raise HTTPException(status_code=404, detail='file not found')
-    return result
+
+    return FileResponse(os.path.join(upload_directory, filename))
 
 
 @app.get("/files/{filename}/:result")
@@ -111,6 +99,6 @@ async def get_result_of_file(filename: str):
 
     result_filename = filename + result_suffix
     try:
-        return await read_file(result_filename)
+        return FileResponse(os.path.join(upload_directory, result_filename))
     except FileNotFoundError:
         raise HTTPException(status_code=202, detail=f'now processing on {result_filename}')

@@ -4,4 +4,5 @@ starlette==0.13.6
 uvicorn==0.13.4
 python-multipart==0.0.5
 aiofile==1.5.2
+aiofiles==0.7.0
 pika==1.2.0
