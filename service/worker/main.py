@@ -13,7 +13,7 @@ import pika
 import requests
 from pika.adapters.blocking_connection import BlockingChannel
 
-import predict.predictor.merger
+import predict.predictor.merger as pred_merger
 
 download_directory = os.environ['DOWNLOAD_PATH']
 file_server = os.environ['FILE_SERVER']
@@ -37,11 +37,11 @@ def random_string_with_time(length: int):
 
 def generate_result(image_path: str) -> str:
     # Predict distance of all pixels
-    merger = predictor.merger.Merger('predict/model_state_dict.pth')
+    merger = pred_merger.Merger('predict/model_state_dict.pth')
     predict = merger.merge(image_path)
 
     # Transform depth array to rgb array
-    predict_img = predictor.merger.transform_to_rgb(predict)
+    predict_img = pred_merger.transform_to_rgb(predict)
 
     # Compare prediction and real distance
     # TODO: Apply labeled data path
@@ -49,8 +49,8 @@ def generate_result(image_path: str) -> str:
     f = h5py.File(path_to_depth_v1)
 
     real_distance = depth = f['depths'][0]
-    real_distance = predictor.merger.transpose_img(real_distance)
-    rmse = predictor.merger.RMSELoss()
+    real_distance = pred_merger.transpose_img(real_distance)
+    rmse = pred_merger.RMSELoss()
 
     rmse_error = rmse(torch.tensor(predict), torch.tensor(real_distance))
     print('rmse_error =', rmse_error.item())
