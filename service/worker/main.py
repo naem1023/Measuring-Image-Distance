@@ -62,9 +62,13 @@ def generate_result(image_path: str) -> str:
 
 def process(filename: str):
     local_filename = random_string_with_time(10)
-    with urllib.request.urlopen(f'{file_server}/files/{filename}') as http:
-        with open(os.path.join(download_directory, local_filename), 'wb') as f:
-            f.write(http.read())
+    try:
+        with urllib.request.urlopen(f'{file_server}/files/{filename}') as http:
+            with open(os.path.join(download_directory, local_filename), 'wb') as f:
+                f.write(http.read())
+    except urllib.error.HTTPError:
+        print('Error while file download')
+        return
 
     print(os.listdir(download_directory))
     result_file = generate_result(os.path.join(download_directory, local_filename))
