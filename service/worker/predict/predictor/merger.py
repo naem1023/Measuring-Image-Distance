@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-
+from skimage.transform import resize
 def transform_to_rgb(depth: numpy.ndarray) -> numpy.ndarray:
     predict_img = np.empty([depth.shape[0], depth.shape[1], 3])
     predict_img[:, :, 0] = depth
@@ -87,10 +87,12 @@ class Merger:
 
     def merge(self, img_path: str, method='mid') -> numpy.ndarray:
         """Calculate distance of all pixels using few distances and full depth.
+        img : (y, x, color)
         """
         img = self.__read_image(img_path).astype('float32') / 255.0
+        img = resize(img, (480, 640, 3), order=1)
 
-        depthes = self.get_depth(img_path, img.shape[0], img.shape[1])
+        depthes = self.get_depth(img_path, x=640, y=480)
         depthes = transpose_img(depthes)
         img = transpose_img(img)
         distances = self.get_distance(img)
@@ -158,7 +160,7 @@ class Merger:
         return distances
 
     def get_depth(self, img_path: str, x: int, y: int) -> numpy.ndarray:
-        depth_predictor = Predictor(self.depth_model, x, y)
+        depth_predictor = Predictor(self.depth_model, input_height=y, input_width=x)
         return depth_predictor.estimate_depth(img_path)
 
     def get_distance_predictor(self, path):

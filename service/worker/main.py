@@ -71,7 +71,11 @@ def process(filename: str):
         return
 
     print(os.listdir(download_directory))
-    result_file = generate_result(os.path.join(download_directory, local_filename))
+    try:
+        result_file = generate_result(os.path.join(download_directory, local_filename))
+    except BaseException as e:
+        result_file = './error.png'
+        print(f'unknown error occurred {e}')
 
     upload_filename = filename + result_suffix
     result = requests.post(
@@ -91,10 +95,7 @@ def main():
 
     def callback(ch: BlockingChannel, method, properties, body: bytes):
         print(f'{body} received')
-        try:
-            process(body.decode())
-        except BaseException:
-            print('unknown error occurred')
+        process(body.decode())
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     print('working on message consuming')

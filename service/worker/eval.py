@@ -8,7 +8,7 @@ import statistics
 import matplotlib.pyplot as plt
 
 
-def eval(method='mid'):
+def eval(ax, method='mid'):
     # Predict distance of all pixels
     merger = pred_merger.Merger('./predict/model_state_dict.pth')
 
@@ -38,7 +38,7 @@ def eval(method='mid'):
         # print('rmse_error =', rmse_error.item())
         rmse_list.append(rmse_error.item())
 
-        if idx > 50:
+        if idx > 5:
             break
 
         # io.imsave('demo_predict_distance.jpg', predict_img)
@@ -46,14 +46,13 @@ def eval(method='mid'):
     print(method, statistics.mean(rmse_list))
 
     hist, bin_edges = np.histogram(rmse_list, bins=20)
-    fig, ax = plt.subplots()
-    ax.hist(rmse_list, bin_edges, cumulative=False)
+    ax.hist(rmse_list, bin_edges, cumulative=False, color='#6495ED')
     ax.set_xlabel('x')
     ax.set_ylabel('Frequency')
     title = '%s (mean=%.5f)' % (method, statistics.mean(rmse_list))
     file_name = 'test-%s.png' % method
     ax.set_title(title)
-    fig.savefig(file_name)
+    # fig.savefig(file_name)
     with open('merger-log.txt', 'a') as log_file:
         log_file.write(f'\n')
     with open('predict-log.txt', 'a') as log_file:
@@ -61,8 +60,21 @@ def eval(method='mid'):
             log_file.write(f'{val} ')
         log_file.write('\n')
 
+    return ax
+
 
 if __name__ == '__main__':
+    with open('merger-log.txt', 'a') as log_file:
+        log_file.write('='*10)
+    with open('predict-log.txt', 'a') as log_file:
+        log_file.write('='*10)
+
     methods = ['mid', 'mean', 'median', 'stdev']
-    for method in methods:
-        eval(method=method)
+    fig, ax = plt.subplots(1, len(methods), figsize=(20, 5))
+
+    all_rmse_list = []
+    for idx, method in enumerate(methods):
+        ax[idx] = eval(ax[idx], method=method)
+    fig.savefig('eval.png',dpi=48)
+
+

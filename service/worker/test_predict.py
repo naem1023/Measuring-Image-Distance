@@ -6,7 +6,7 @@ import numpy as np
 import h5py
 import subprocess as sp
 
-def predict():
+def compare():
     # Predict distance of all pixels
     merger = pred_merger.Merger('./predict/model_state_dict.pth')
     predict = merger.merge('demo.jpg')
@@ -24,6 +24,14 @@ def predict():
     rmse_error = rmse(torch.tensor(predict), torch.tensor(real_distance))
     print('rmse_error =', rmse_error.item())
 
+    io.imsave('demo_predict_distance.jpg', predict_img)
+def predict():
+    # Predict distance of all pixels
+    merger = pred_merger.Merger('./predict/model_state_dict.pth')
+    predict = merger.merge('Vath_temp.jpg')
+
+    # Transform depth array to rgb array
+    predict_img = pred_merger.transform_to_rgb(predict)
     io.imsave('demo_predict_distance.jpg', predict_img)
 
 if __name__ == '__main__':
