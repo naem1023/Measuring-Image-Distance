@@ -1,5 +1,6 @@
 import numpy
 
+# import predict.ny.distance as distance
 import predict.ny.distance as distance
 import megadepth.MegaDepth.models
 from megadepth.MegaDepth.predictor import Predictor
@@ -84,7 +85,7 @@ class Merger:
     #
     #     return img_
 
-    def merge(self, img_path: str) -> numpy.ndarray:
+    def merge(self, img_path: str, method='mid') -> numpy.ndarray:
         """Calculate distance of all pixels using few distances and full depth.
         """
         img = self.__read_image(img_path).astype('float32') / 255.0
@@ -94,21 +95,53 @@ class Merger:
         img = transpose_img(img)
         distances = self.get_distance(img)
 
-        x_interval = img.shape[0] // self.x_point
-        y_interval = img.shape[1] // self.y_point
+        # How many interval in each axes
+        x_interval = img.shape[1] // self.x_point
+        y_interval = img.shape[2] // self.y_point
 
-        mid_pivot = len(distances) // 2
-        point, predict_distance = distances[mid_pivot]
-        predict_depth = depthes[point[0], point[1]]
-        ratio = predict_distance / predict_depth
+        if method == 'mid':
+            mid_pivot = len(distances) // 2
+            point, predict_distance = distances[mid_pivot]
+            predict_depth = depthes[point[0], point[1]]
+            ratio = predict_distance / predict_depth
+        elif method == 'mean':
+            ratio = 0
+            for distance in distances:
+                point, predict_distance = distance
+                predict_depth = depthes[point[0], point[1]]
+                ratio += predict_distance / predict_depth
+            ratio /= len(distances)
+        elif method == 'median':
+            import statistics
+            ratio_list = []
+            for distance in distances:
+                point, predict_distance = distance
+                predict_depth = depthes[point[0], point[1]]
+                ratio_list.append(predict_distance / predict_depth)
+            ratio = statistics.median(ratio_list)
+        elif method == 'stdev':
+            import statistics
+            ratio_list = []
+            for distance in distances:
+                point, predict_distance = distance
+                predict_depth = depthes[point[0], point[1]]
+                ratio_list.append(predict_distance / predict_depth)
+            ratio = statistics.stdev(ratio_list)
+
+        with open('merger-log.txt', 'a') as log_file:
+            log_file.write(f'{ratio} ')
 
         for distance_info in distances:
             point, predict_distance = distance_info
             # predict_depth = depthes[point[0], point[1]]
             # ratio = predict_distance / predict_depth
-            x = point[0] - self.x_point
+
+            # Position of root point in region is left and top.
+            x = point[0]
             y = point[1]
 
+            # Set region in (x, y) to (x + x_interval - 1, y + y_interval - 1)
+            # and calculate distance of region's all pixel.
             for i in range(x_interval):
                 for j in range(y_interval):
                     depthes[x + i, y + j] *= ratio

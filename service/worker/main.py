@@ -45,7 +45,7 @@ def generate_result(image_path: str) -> str:
 
     # Compare prediction and real distance
     # TODO: Apply labeled data path
-    path_to_depth_v1 = '/nyu_data/nyu_depth_data_labeled.mat'
+    path_to_depth_v1 = '/home/relilau/nfs-home/nyu_data/nyu_depth_data_labeled.mat'
     f = h5py.File(path_to_depth_v1)
 
     real_distance = depth = f['depths'][0]
