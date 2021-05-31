@@ -41,4 +41,6 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 80:80
+    environment:
+      REACT_APP_API_URI: ${API_URI:-127.0.0.1:8080}
     restart: unless-stopped
