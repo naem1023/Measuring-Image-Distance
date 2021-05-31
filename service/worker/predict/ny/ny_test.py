@@ -6,7 +6,7 @@ from PIL import Image
 
 # v1,2_labeled: depths,images,rawDepths, rawDepthFilenames
 path_to_depth_v2 = 'Z:/nyu_data/nyu_depth_v2_labeled.mat'
-path_to_depth_v1 = 'Z:/nyu_data/nyu_depth_data_labeled.mat'
+path_to_depth_v1 = '/home/relilau/nfs-home/nyu_data/nyu_depth_data_labeled.mat'
 # v1_filenames: rawDepthFilenames, rawRgbFilenames
 path_to_filename_v1 = 'Z:/nyu_data/nyu_depth_v1_filenames.mat'
 f = h5py.File(path_to_depth_v1)

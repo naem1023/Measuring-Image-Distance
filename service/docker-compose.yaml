@@ -26,7 +26,7 @@ services:
       context: ./worker
       dockerfile: ./Dockerfile
     environment:
-      FILE_SERVER: http://api:8080
+      FILE_SERVER: http://192.168.0.3:8080
       RABBITMQ_HOST: rabbitmq
       QUEUE_NAME: IMAGE-PROCESS
       RESULT_SUFFIX: _result

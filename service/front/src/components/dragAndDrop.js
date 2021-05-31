@@ -19,7 +19,7 @@ function MyDropzone({setResultPath: setPropResultPath}) {
     };
     formData.append("files", acceptedFiles[0]);
 
-    axios.defaults.baseURL = "http://api:8080/";
+    axios.defaults.baseURL = "http://192.168.0.3:8080/";
     const response = await axios.post("/files", formData, config);
 	const uploadedFile = response.data.files[0].stored;
 	setUploadedImage(uploadedFile)

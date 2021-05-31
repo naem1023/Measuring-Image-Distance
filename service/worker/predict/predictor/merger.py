@@ -1,5 +1,6 @@
 import numpy
 
+# import predict.ny.distance as distance
 import predict.ny.distance as distance
 import megadepth.MegaDepth.models
 from megadepth.MegaDepth.predictor import Predictor
@@ -84,7 +85,7 @@ class Merger:
     #
     #     return img_
 
-    def merge(self, img_path: str) -> numpy.ndarray:
+    def merge(self, img_path: str, method='mid') -> numpy.ndarray:
         """Calculate distance of all pixels using few distances and full depth.
         """
         img = self.__read_image(img_path).astype('float32') / 255.0
@@ -98,9 +99,35 @@ class Merger:
         y_interval = img.shape[1] // self.y_point
 
         mid_pivot = len(distances) // 2
-        point, predict_distance = distances[mid_pivot]
-        predict_depth = depthes[point[0], point[1]]
-        ratio = predict_distance / predict_depth
+
+        print('method=', method)
+        if method == 'mid':
+            point, predict_distance = distances[mid_pivot]
+            predict_depth = depthes[point[0], point[1]]
+            ratio = predict_distance / predict_depth
+        elif method == 'mean':
+            ratio = 0
+            for distance in distances:
+                point, predict_distance = distance
+                predict_depth = depthes[point[0], point[1]]
+                ratio += predict_distance / predict_depth
+            ratio /= len(distances)
+        elif method == 'median':
+            import statistics
+            ratio_list = []
+            for distance in distances:
+                point, predict_distance = distance
+                predict_depth = depthes[point[0], point[1]]
+                ratio_list.append(predict_distance / predict_depth)
+            ratio = statistics.median(ratio_list)
+        elif method == 'stdev':
+            import statistics
+            ratio_list = []
+            for distance in distances:
+                point, predict_distance = distance
+                predict_depth = depthes[point[0], point[1]]
+                ratio_list.append(predict_distance / predict_depth)
+            ratio = statistics.stdev(ratio_list)
 
         for distance_info in distances:
             point, predict_distance = distance_info
