@@ -1,29 +1,35 @@
 import {useState, useEffect} from 'react';
 import './App.css';
+import { apiUri } from './string';
 import { MyDropzone } from './components/dragAndDrop';
 import styled, { createGlobalStyle } from "styled-components";
 
 function App() {
-
 	const [resultPath, setResultPath] = useState("");
+	const [originalPath, setOriginalPath] = useState("");
 
 	useEffect(() => {
 		// TOOD: Do something with result file
 		console.log(resultPath)
 	}, [resultPath])
 
+	useEffect(() => {
+		// TOOD: Do something with result file
+		console.log(originalPath)
+	}, [originalPath])
+
   return (
     <div className="App">
+      <MyDropzone setResultPath={setResultPath} setOriginalPath={setOriginalPath} />
         <Container>
           <GlobalStyle />
           <Post>
             <Title>원본 이미지 파일</Title>
-		    <MyDropzone setResultPath={setResultPath} />
-            <Body>원본 이미지</Body>
+            <Body><Image src={`${apiUri}/${originalPath}`} alt='Original image'/></Body>
           </Post>
           <Post>
             <Title>깊이 이미지 파일</Title>
-            <Body>깊이 이미지</Body>
+            <Body><Image src={`${apiUri}/${resultPath}`} alt='Depth image'/></Body>
           </Post>
           <Post>
             <Title>계산된 미터 값</Title>
@@ -50,7 +56,7 @@ const Container = styled.div`
   grid-auto-rows: 500px;
   grid-gap: 50px 20px;
   justify-content: center;
-  background: #55efc4;
+  background: white;
   box-sizing: border-box;
 `;
 
@@ -75,5 +81,9 @@ const Body = styled.div`
   padding: 11px;
   border-radius: 20px;
 `;
+
+const Image = styled.img`
+width: 100%
+`
 
 export default App;
