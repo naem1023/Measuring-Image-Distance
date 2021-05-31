@@ -128,6 +128,7 @@ class Merger:
                 predict_depth = depthes[point[0], point[1]]
                 ratio_list.append(predict_distance / predict_depth)
             ratio = statistics.stdev(ratio_list)
+        print('ratio=', ratio)
 
         for distance_info in distances:
             point, predict_distance = distance_info
