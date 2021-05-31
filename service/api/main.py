@@ -13,6 +13,7 @@ from aiofile import AIOFile, Writer, Reader
 upload_directory = os.environ['UPLOAD_PATH']
 access_token = os.environ['ACCESS_TOKEN']
 result_suffix = os.environ['RESULT_SUFFIX']
+array_suffix = os.environ['ARRAY_SUFFIX']
 queue_name = os.environ['QUEUE_NAME']
 rabbitmq_host = os.environ['RABBITMQ_HOST']
 
@@ -91,13 +92,23 @@ async def get_file(filename: str):
 
     return FileResponse(os.path.join(upload_directory, filename))
 
-
 @app.get("/files/{filename}/:result")
 async def get_result_of_file(filename: str):
     if not os.path.isfile(os.path.join(upload_directory, filename)):
         raise HTTPException(status_code=404, detail='file not found')
 
     result_filename = filename + result_suffix
+    if not os.path.isfile(os.path.join(upload_directory, result_filename)):
+        raise HTTPException(status_code=202, detail=f'now processing on {result_filename}')
+
+    return FileResponse(os.path.join(upload_directory, result_filename))
+
+@app.get("/files/{filename}/:array")
+async def get_result_of_file(filename: str):
+    if not os.path.isfile(os.path.join(upload_directory, filename)):
+        raise HTTPException(status_code=404, detail='file not found')
+
+    result_filename = filename + array_suffix
     if not os.path.isfile(os.path.join(upload_directory, result_filename)):
         raise HTTPException(status_code=202, detail=f'now processing on {result_filename}')
 

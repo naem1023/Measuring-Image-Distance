@@ -6,7 +6,8 @@ import numpy as np
 import h5py
 import statistics
 import matplotlib.pyplot as plt
-
+from matplotlib import colors
+from matplotlib.ticker import PercentFormatter
 
 def eval(ax, method='mid'):
     # Predict distance of all pixels
@@ -38,17 +39,31 @@ def eval(ax, method='mid'):
         # print('rmse_error =', rmse_error.item())
         rmse_list.append(rmse_error.item())
 
-        if idx > 5:
+        if idx > 2:
             break
 
         # io.imsave('demo_predict_distance.jpg', predict_img)
     print(len(f['images']), idx)
     print(method, statistics.mean(rmse_list))
 
-    hist, bin_edges = np.histogram(rmse_list, bins=20)
-    ax.hist(rmse_list, bin_edges, cumulative=False, color='#6495ED')
+    hist, bin_edges = np.histogram(rmse_list, bins=30, density=True, range=[0.0, 7.0])
+    N, bins, patches = ax.hist(rmse_list, bin_edges, cumulative=False, color='#6495ED')
+
+    # We'll color code by height, but you could use any scalar
+    fracs = N / N.max()
+
+    # we need to normalize the data to 0..1 for the full range of the colormap
+    norm = colors.Normalize(fracs.min(), fracs.max())
+
+    # Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches):
+        color = plt.cm.viridis(norm(thisfrac))
+        thispatch.set_facecolor(color)
+    ax.yaxis.set_major_formatter(PercentFormatter(xmax=1))
+
     ax.set_xlabel('x')
     ax.set_ylabel('Frequency')
+    # ax.set_ylim(0, 2000)
     title = '%s (mean=%.5f)' % (method, statistics.mean(rmse_list))
     file_name = 'test-%s.png' % method
     ax.set_title(title)
@@ -70,11 +85,11 @@ if __name__ == '__main__':
         log_file.write('='*10)
 
     methods = ['mid', 'mean', 'median', 'stdev']
-    fig, ax = plt.subplots(1, len(methods), figsize=(20, 5))
+    fig, ax = plt.subplots(1, len(methods), figsize=(20, 6))
 
     all_rmse_list = []
     for idx, method in enumerate(methods):
         ax[idx] = eval(ax[idx], method=method)
-    fig.savefig('eval.png',dpi=48)
+    fig.savefig('eval.png')
 
 

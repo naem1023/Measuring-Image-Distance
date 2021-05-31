@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Docker container's file
+service/worker/files/
+
+# pycharm
+.idea
+
 # Distribution / packaging
 .Python
 build/

@@ -3,7 +3,9 @@ import random
 import string
 import tempfile
 import time
+import json
 import urllib.request
+from typing import Tuple
 
 from skimage import io
 import torch
@@ -21,6 +23,7 @@ queue_name = os.environ['QUEUE_NAME']
 rabbitmq_host = os.environ['RABBITMQ_HOST']
 access_token = os.environ['ACCESS_TOKEN']
 result_suffix = os.environ['RESULT_SUFFIX']
+array_suffix = os.environ['ARRAY_SUFFIX']
 
 try:
     os.mkdir(download_directory)
@@ -35,16 +38,19 @@ def random_string_with_time(length: int):
     ) + '-' + str(int(time.time()))
 
 
-def generate_result(image_path: str) -> str:
+def generate_result(image_path: str) -> Tuple[str, str]:
     # Predict distance of all pixels
     merger = pred_merger.Merger('predict/model_state_dict.pth')
     predict = merger.merge(image_path)
+
+    result_array_filename = image_path + '_2darray'
+    with open(result_array_filename, 'wb') as f:
+        f.write(json.dumps(predict.tolist()).encode('utf8'))
 
     # Transform depth array to rgb array
     predict_img = pred_merger.transform_to_rgb(predict)
 
     # Compare prediction and real distance
-    # TODO: Apply labeled data path
     path_to_depth_v1 = '/home/relilau/nfs-home/nyu_data/nyu_depth_data_labeled.mat'
     f = h5py.File(path_to_depth_v1)
 
@@ -57,7 +63,7 @@ def generate_result(image_path: str) -> str:
 
     result_filename = 'demo_predict_distance.jpg'
     io.imsave(result_filename, predict_img)
-    return result_filename
+    return (result_filename, result_array_filename)
 
 
 def process(filename: str):
@@ -70,20 +76,26 @@ def process(filename: str):
         print('Error while file download')
         return
 
-    print(os.listdir(download_directory))
     try:
-        result_file = generate_result(os.path.join(download_directory, local_filename))
+        result_image, result_array = generate_result(os.path.join(download_directory, local_filename))
     except BaseException as e:
-        result_file = './error.png'
+        result_image, result_array = ('./error.png', './error-array.2darray')
         print(f'unknown error occurred {e}')
 
-    upload_filename = filename + result_suffix
     result = requests.post(
-        f'{file_server}/files/{upload_filename}',
-        files={'file': open(result_file, 'rb')},
+        f'{file_server}/files/{filename + result_suffix}',
+        files={'file': open(result_image, 'rb')},
         headers={'Authorization': f'Basic {access_token}'},
     )
-    print(result)
+    print(f'upload result {result} for {filename} image')
+    
+    result = requests.post(
+        f'{file_server}/files/{filename + array_suffix}',
+        files={'file': open(result_array, 'rb')},
+        headers={'Authorization': f'Basic {access_token}'},
+    )
+    print(f'upload result {result} for {filename} array')
+
 
 
 

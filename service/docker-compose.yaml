@@ -16,6 +16,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       QUEUE_NAME: IMAGE-PROCESS
       RESULT_SUFFIX: _result
+      ARRAY_SUFFIX: _array
       ACCESS_TOKEN: TOKEN_FOR_DIRECT_UPLOAD
       UPLOAD_PATH: ./files
     restart: unless-stopped
@@ -30,6 +31,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       QUEUE_NAME: IMAGE-PROCESS
       RESULT_SUFFIX: _result
+      ARRAY_SUFFIX: _array
       ACCESS_TOKEN: TOKEN_FOR_DIRECT_UPLOAD
       DOWNLOAD_PATH: ./files
     restart: unless-stopped
