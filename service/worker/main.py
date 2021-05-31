@@ -91,7 +91,10 @@ def main():
 
     def callback(ch: BlockingChannel, method, properties, body: bytes):
         print(f'{body} received')
-        process(body.decode())
+        try:
+            process(body.decode())
+        except BaseException:
+            print('unknown error occurred')
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     print('working on message consuming')
