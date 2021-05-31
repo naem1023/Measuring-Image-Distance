@@ -98,7 +98,7 @@ async def get_result_of_file(filename: str):
         raise HTTPException(status_code=404, detail='file not found')
 
     result_filename = filename + result_suffix
-    try:
-        return FileResponse(os.path.join(upload_directory, result_filename))
-    except FileNotFoundError:
+    if not os.path.isfile(os.path.join(upload_directory, result_filename)):
         raise HTTPException(status_code=202, detail=f'now processing on {result_filename}')
+
+    return FileResponse(os.path.join(upload_directory, result_filename))
