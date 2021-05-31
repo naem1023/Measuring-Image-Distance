@@ -4,12 +4,17 @@ import axios from 'axios'
 import {useDropzone} from 'react-dropzone'
 import styled from "styled-components";
 
-function MyDropzone({setResultPath: setPropResultPath, setOriginalPath: setPropOriginalPath}) {
+function MyDropzone({
+  setResultPath: setPropResultPath,
+  setOriginalPath: setPropOriginalPath,
+  setResultArrayPath: setPropResultArrayPath
+}) {
 
   const [uploadedImage, setUploadedImage] = useState("");
   const [processedStatus, setProcessedStatus] = useState(0);
   const [intervalId, setIntervalId] = useState(0);
   const [resultFilePath, setResultFilePath] = useState("");
+  const [resultArrayFilePath, setResultArrayFilePath] = useState("");
   const [originalFilePath, setOriginalFilePath] = useState("");
 
   const onDrop = useCallback(async acceptedFiles => {
@@ -42,6 +47,7 @@ function MyDropzone({setResultPath: setPropResultPath, setOriginalPath: setPropO
 		if (processedStatus === 200) {
 			clearInterval(intervalId)
 			setResultFilePath(`files/${uploadedImage}/:result`)
+			setResultArrayFilePath(`files/${uploadedImage}/:array`)
 		}
 	}, [processedStatus, uploadedImage, intervalId])
 
@@ -54,6 +60,11 @@ function MyDropzone({setResultPath: setPropResultPath, setOriginalPath: setPropO
     console.log(originalFilePath)
 		setPropOriginalPath(originalFilePath)
 	}, [originalFilePath, setPropOriginalPath])
+
+  useEffect(() => {
+    console.log(resultArrayFilePath)
+		setPropResultArrayPath(resultArrayFilePath)
+	}, [resultArrayFilePath, setPropResultArrayPath])
 
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
 

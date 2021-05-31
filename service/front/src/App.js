@@ -7,6 +7,7 @@ import styled, { createGlobalStyle } from "styled-components";
 function App() {
 	const [resultPath, setResultPath] = useState("");
 	const [originalPath, setOriginalPath] = useState("");
+	const [resultArrayPath, setResultArrayPath] = useState("");
 
 	useEffect(() => {
 		// TOOD: Do something with result file
@@ -18,9 +19,14 @@ function App() {
 		console.log(originalPath)
 	}, [originalPath])
 
+	useEffect(() => {
+		// TOOD: Do something with result file
+		console.log(resultArrayPath)
+	}, [resultArrayPath])
+
   return (
     <div className="App">
-      <MyDropzone setResultPath={setResultPath} setOriginalPath={setOriginalPath} />
+      <MyDropzone setResultPath={setResultPath} setOriginalPath={setOriginalPath} setResultArrayPath={setResultArrayPath} />
         <Container>
           <GlobalStyle />
           <Post>
@@ -33,7 +39,7 @@ function App() {
           </Post>
           <Post>
             <Title>계산된 미터 값</Title>
-            <Body>미터 값</Body>
+            <Body><a href={`${apiUri}/${resultArrayPath}`}>Meter array</a></Body>
           </Post>
         </Container>
     </div>
