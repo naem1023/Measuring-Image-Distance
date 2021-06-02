@@ -8,6 +8,9 @@ import statistics
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
+import warnings
+warnings.filterwarnings('ignore')
+from tqdm.auto import tqdm
 
 def eval(ax, model_path, method='mid'):
     model_title = '-'.join(model_path.split('/')[-1].split('.')[0].split('-')[0:3])
@@ -19,11 +22,12 @@ def eval(ax, model_path, method='mid'):
 
     rmse_list = []
 
-    for idx, img in enumerate(f['images']):
+    for idx, img in enumerate(tqdm(f['images'])):
         img_ = np.empty([480, 640, 3])
         img_[:, :, 0] = img[0, :, :].T
         img_[:, :, 1] = img[1, :, :].T
         img_[:, :, 2] = img[2, :, :].T
+        img_ = img_.astype('uint8')
         io.imsave('demo.jpg', img_)
 
         predict = merger.merge('demo.jpg', method=method)
@@ -84,10 +88,12 @@ if __name__ == '__main__':
     # with open('predict-log.txt', 'a') as log_file:
     #     log_file.write('='*10)
 
+    import time
+    start = time.time()
     model_pathes = [
         # './predict/model_state_dict.pth',
-        './predict/mobilnetv3small-epoch-20-model-state-dict.pth',
-        './predict/mobilnetv3small-epoch-100-model-state-dict.pth',
+        # './predict/mobilnetv3small-epoch-20-model-state-dict.pth',
+        # './predict/mobilnetv3small-epoch-100-model-state-dict.pth',
         './predict/vgg11-epoch-100-model-state-dict.pth',
     ]
     methods = ['mid', 'mean', 'median', 'stdev']
@@ -100,5 +106,8 @@ if __name__ == '__main__':
             ax[idx] = eval(ax[idx], model_path, method=method)
         model_title = model_path.split('/')[-1].split('.')[0]
         fig.savefig(f'{model_title}-eval.png')
+    end = time.time()
+
+    print('elapsed time =', (end - start) / 60)
 
 

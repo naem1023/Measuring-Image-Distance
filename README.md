@@ -5,14 +5,17 @@
 - pytorch >= 1.8
 - requirements.txt
 
-# API server requirement
-- service/api/requirements.txt
-
 # Test Predictor
 ```
-python predict.py
+# cd service/worker
+# python test_predict.py
 ```
 
-# Test API server
-...
- 
+# Test Evaluation
+```
+# cd service/worker
+# python eval.py
+```
+
+# About API server and worker
+Read service/README.md
