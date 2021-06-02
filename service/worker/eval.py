@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from tqdm.auto import tqdm
 
-def eval(ax, model_path, method='mid'):
+def eval(ax, model_path, method='mid', model_selection=None):
     model_title = '-'.join(model_path.split('/')[-1].split('.')[0].split('-')[0:3])
     # Predict distance of all pixels
     merger = pred_merger.Merger(model_path)
@@ -30,7 +30,7 @@ def eval(ax, model_path, method='mid'):
         img_ = img_.astype('uint8')
         io.imsave('demo.jpg', img_)
 
-        predict = merger.merge('demo.jpg', method=method)
+        predict = merger.merge('demo.jpg', method=method, model_selection=model_selection)
 
         # Transform depth array to rgb array
         predict_img = pred_merger.transform_to_rgb(predict)
@@ -94,16 +94,22 @@ if __name__ == '__main__':
         # './predict/model_state_dict.pth',
         # './predict/mobilnetv3small-epoch-20-model-state-dict.pth',
         # './predict/mobilnetv3small-epoch-100-model-state-dict.pth',
-        './predict/vgg11-epoch-100-model-state-dict.pth',
+        # './predict/vgg11-epoch-100-model-state-dict.pth',
+        './predict/vgg11-epoch-5-model-state-dict.pth',
     ]
     methods = ['mid', 'mean', 'median', 'stdev']
     for model_path in model_pathes:
         model_title = '-'.join(model_path.split('/')[-1].split('.')[0].split('-')[0:3])
+        model_selection = model_path.split('/')[-1].split('.')[0].split('-')[0]
+        if model_selection == 'vgg11':
+            model_selection = 'vgg'
+        else:
+            model_selection = None
         fig, ax = plt.subplots(1, len(methods), figsize=(22, 6))
 
         all_rmse_list = []
         for idx, method in enumerate(methods):
-            ax[idx] = eval(ax[idx], model_path, method=method)
+            ax[idx] = eval(ax[idx], model_path, method=method, model_selection=model_selection)
         model_title = model_path.split('/')[-1].split('.')[0]
         fig.savefig(f'{model_title}-eval.png')
     end = time.time()

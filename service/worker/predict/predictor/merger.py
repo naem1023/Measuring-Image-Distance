@@ -85,7 +85,7 @@ class Merger:
     #
     #     return img_
 
-    def merge(self, img_path: str, method='stdev') -> numpy.ndarray:
+    def merge(self, img_path: str, method='stdev', model_selection=None) -> numpy.ndarray:
         """Calculate distance of all pixels using few distances and full depth.
         img : (y, x, color)
         """
