@@ -6,6 +6,7 @@
 - requirements.txt
 
 # Test Predictor
+Run test predictor with 'demo.jpg'.
 ```
 # cd service/worker
 # python test_predict.py
@@ -16,6 +17,12 @@
 # cd service/worker
 # python eval.py
 ```
+
+# Train
+- Open train_in_colab.ipynb in colab.
+- Using TPU, run from first cell.
+- Using GPU, run from 'Train distance via colab'.
+- Specify your '*.mat' file in google drive and set path.
 
 # About API server and worker
 Read service/README.md
