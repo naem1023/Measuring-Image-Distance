@@ -18,7 +18,15 @@
 
 # Service Overview
 ![](result/Model-Service-Overview.png)
-- API 
+- Front-end Web service: React
+- Image Serve API Server: FastAPI
+  - Upload raw image and download depth image.
+  - Send image to Message Queue
+- Message Queue: RabbitMQ
+- Image Processor
+  - Receive image from Message Queue.
+  - Call Predictor.
+  - Return processed image to Message Queue.
 # Requirements
 - service/worker/requirements.txt
 
