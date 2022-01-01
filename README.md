@@ -12,7 +12,7 @@
   - MegaDepth: Learning Single-View Depth Prediction from Internet Photos
 
 1. n개의 픽셀을 개별적으로 Distance Predictor에 통과시켜 n개의 픽셀에 대한 미터 단위의 거리 정보를 획득.
-2. Depth Predictor로 전체 이미지에 대하 깊이 정보 획득.
+2. Depth Predictor로 전체 이미지에 대한 깊이 정보 획득.
 3. Merger에서 1번, 2번의 정보를 조합.
 4. 전체 픽셀에 대한 미터 단위의 거리 정보 획득.
 
